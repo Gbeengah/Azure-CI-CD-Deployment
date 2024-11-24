@@ -1,0 +1,54 @@
+trigger:
+- main
+
+pool:
+  name: Default  # Reference your self-hosted agent pool
+
+steps:
+# Step 1: Install zip utility
+- script: sudo apt-get update && sudo apt-get install -y zip
+  displayName: 'Install zip utility'
+
+# Step 2: Copy files to the artifact staging directory
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+# Step 3: Publish the build artifact
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'webpage'
+
+# Step 4: Debugging step to list files in the artifact directory
+- script: |
+    echo "Listing files in the artifact staging directory:"
+    ls -l /home/azureuser/myagent/_work/8/a
+  displayName: 'Debug: List files in artifact directory'
+
+# Step 5: Ensure correct permissions for index.html
+- script: sudo chmod 644 /home/azureuser/myagent/_work/8/a/index.html
+  displayName: 'Ensure index.html has correct permissions'
+
+# Step 6: Run the deployment script via SSH
+- task: SSH@0
+  inputs:
+    sshEndpoint: 'WebAppConnection'  # This should match the service connection name you created
+    runOptions: 'inline'
+    inline: |
+      echo "Debugging: Verifying index.html on remote server"
+      ls -l /home/azureuser/myagent/_work/8/a/index.html
+      
+      echo "Switching to the artifact directory"
+      cd /home/azureuser/myagent/_work/8/a
+
+      echo "Copying index.html to /var/www/html/"
+      sudo mkdir -p /var/www/html
+      sudo cp index.html /var/www/html/
+
+      echo "Setting permissions and executing deploy.sh"
+      sudo chmod +x /var/www/html/deploy.sh
+      sudo /var/www/html/deploy.sh
+    failOnStderr: true
