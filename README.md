@@ -47,4 +47,4 @@ Checked for proper display and functionality.
 Monitor: Set up Azure Monitor or Application Insights to keep track of the VM's performance and the application's availability.
 Maintenance: Created plans for updating the webpage or handling server changes.
 
-Check out the full article here --> https://medium.com/p/e03c15bb115f/edit
+Check out the full article here --> [https://medium.com/p/e03c15bb115f/edit](https://bgbenga7.medium.com/azure-ci-cd-deployment-e03c15bb115f)
